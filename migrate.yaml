@@ -6,9 +6,12 @@
   tasks:
     - name: Migrating Vm from source to destination
       command: pwsh ./script/migration.ps1
+      args:
+        - 
+        - 
       ignore_errors: yes
       changed_when: false
       register: powershell_output
     - name: Display migration output
       debug:
-        msg: {{ powershell_output }}
+        msg: "{{ powershell_output.stdout_lines }}"

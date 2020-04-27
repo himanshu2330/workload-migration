@@ -26,4 +26,4 @@ foreach($cluster in Get-Cluster -Name $clusterName){
     $row."Available Disk Space (GB)" = ($ds | Measure-Object -Property FreeSpaceGB -Sum).Sum
     $report += $row
 } 
-$report | Out-File -FilePath cluster_info.json 
+$report | Out-File -FilePath report/destination_host_memory_info.json 

@@ -4,11 +4,18 @@
   vars_files:
    - "{{ myvarfile }}"
   tasks:
-    - name: Migrating Vm from source to destination
-      command: pwsh ./script/create_report.ps1
+    - name: Fetching report from source VM and destination cluster
+      command: pwsh ./script/vm_info.ps1 {{ item }}
       ignore_errors: yes
       changed_when: false
       register: powershell_output
-    - name: Display migration output
-      debug:
-        msg: "{{ powershell_output }}"
+      no_log: True
+      with_items:
+        - "{{ VM_list }}"
+
+    - name: Fetching memory info from destination cluster
+      command: pwsh ./script/vcsa_test.ps2
+      ignore_errors: yes
+      changed_when: false
+      register: output
+      no_log: True

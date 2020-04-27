@@ -27,5 +27,4 @@ Select @{N='VM';E={$_.Name}},
 
     @{N='MemAllocated(GB)';E={$_.Group[0].Entity.MemoryGB}},
 
-    @{N='vCPU';E={$_.Group[0].Entity.NumCpu}} | Out-File -FilePath vminfo.json
-
+    @{N='vCPU';E={$_.Group[0].Entity.NumCpu}} | Out-File -FilePath report/vminfo.json
