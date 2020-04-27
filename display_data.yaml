@@ -1,0 +1,137 @@
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+   - "{{ myvarfile }}"
+  vars:
+    vm_nic: []
+  tasks:
+    - name: Login into vCenter and get cookies
+      uri:
+        url: "{{ source_vcenter_url }}/rest/com/vmware/cis/session"
+        force_basic_auth: yes
+        validate_certs: no
+        method: POST
+        user: "administrator@vsphere.local"
+        password: "Vmware@123"
+      register: login
+      no_log: True
+
+    - name: Returns the power state information of a virtual machine.
+      uri:
+        url: "{{ source_vcenter_url }}/rest/vcenter/vm/{{ item }}/power" 
+        force_basic_auth: yes
+        validate_certs: no
+        headers:
+          Cookie: "{{ login.set_cookie }}"
+      register: powerdetails
+      with_items:
+        - "{{ VM_list }}" 
+    
+    - name: Printing information about a virtual machine
+      debug:
+        msg: "{{ powerdetails.results|map(attribute='json.value')|list }}"
+
+
+    - name: Returns the CPU-related settings of a virtual machine.
+      uri:
+        url: "{{ source_vcenter_url }}/rest/vcenter/vm/{{ item }}/hardware/cpu" 
+        force_basic_auth: yes
+        validate_certs: no
+        headers:
+          Cookie: "{{ login.set_cookie }}"
+      register: cpudetails
+      with_items:
+        - "{{ VM_list }}"
+    
+    - name: Printing the CPU-related settings of a virtual machine.
+      debug:
+        msg: "{{ cpudetails.results|map(attribute='json.value')|list }}"
+
+
+    - name: Returns commonly used information about the virtual disks belonging to the virtual machine.
+      uri:
+        url: "{{ source_vcenter_url }}/rest/vcenter/vm/{{ item }}/hardware/disk" 
+        force_basic_auth: yes
+        validate_certs: no
+        headers:
+          Cookie: "{{ login.set_cookie }}"
+      register: diskdetails
+      with_items:
+        - "{{ VM_list }}"
+    
+    - name: Printing information about the virtual disks belonging to the virtual machine.
+      debug:
+        msg: "{{ diskdetails.results|map(attribute='json.value')|list }}"
+
+    - name: Returns the memory-related settings of a virtual machine.
+      uri:
+        url: "{{ source_vcenter_url }}/rest/vcenter/vm/{{ item }}/hardware/memory" 
+        force_basic_auth: yes
+        validate_certs: no
+        headers:
+          Cookie: "{{ login.set_cookie }}"
+      register: memorydetails
+      with_items:
+        - "{{ VM_list }}"
+    
+    - name: Printing memory-related settings of a virtual machine.
+      debug:
+        msg: "{{ memorydetails.results|map(attribute='json.value')|list }}"
+
+
+    - name: Returns commonly used information about the virtual Ethernet adapters belonging to the virtual machine.
+      uri:
+        url: "{{ source_vcenter_url }}/rest/vcenter/vm/{{ item }}/hardware/ethernet" 
+        force_basic_auth: yes
+        validate_certs: no
+        headers:
+          Cookie: "{{ login.set_cookie }}"
+      register: ethernetdetails
+      with_items:
+        - "{{ VM_list }}"
+    
+    - name: Printing information about the virtual Ethernet adapters belonging to the virtual machine.
+      debug:
+        msg: "{{ ethernetdetails.results|map(attribute='json.value')|list }}"
+
+
+
+    - name: Printing destination esxi host details
+      command: pwsh script/destination_cluster.ps1
+      ignore_errors: yes
+      changed_when: false
+      register: esxi_host_output
+      no_log: True
+
+    - name: print host info
+      debug:
+        msg: "{{ esxi_host_output.stdout_lines }}"
+#    - name: Getting destination esxi host report
+#      command: pwsh ./script/vcsa_test.ps2
+#      ignore_errors: yes
+#      changed_when: false
+#      register: powershell_output
+#      no_log: True
+
+#    - name: Printing destination esxi host details
+#      command: pwsh script/vcsa_test.ps1 
+#      ignore_errors: yes
+#      changed_when: false
+#      register: esxi_host_output
+#      no_log: True
+#
+#    - name: print host info
+#      debug:
+#        msg: "{{ esxi_host_output.stdout_lines }}"
+
+#    - name: Getting report for vm to be migrated
+#      command: pwsh script/vm_info.ps1 {{ item }}
+#      args: {{ item }}
+#      ignore_errors: yes
+#      changed_when: false
+#      register: powershell_output
+#      no_log: True
+#      with_items:
+#        - "{{ VM_list }}"
+

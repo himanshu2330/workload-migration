@@ -1,0 +1,29 @@
+Connect-VIServer -Server 192.168.179.141 -User administrator@vsphere.local -Password Vmware@123 | Out-Null
+$report = @()
+# $clusterName = "MyCluster" 
+$clusterName = "*" 
+
+foreach($cluster in Get-Cluster -Name $clusterName){
+    $esx = $cluster | Get-VMHost    
+    $ds = Get-Datastore -VMHost $esx | where {$_.Type -eq "VMFS" -and $_.Extensiondata.Summary.MultipleHostAccess}
+        
+    $row = "" | Select VCname,DCname,Clustername,"Total Physical Memory (GB)",
+                "Configured Memory GB","Available Memroy (GB)",
+                "Total CPU (Mhz)","Configured CPU (Mhz)",
+                "Available CPU (Mhz)","Total Disk Space (GB)",
+                "Configured Disk Space (GB)","Available Disk Space (GB)"
+    $row.VCname = $cluster.Uid.Split(':@')[1]
+    $row.DCname = (Get-Datacenter -Cluster $cluster).Name
+    $row.Clustername = $cluster.Name
+    $row."Total Physical Memory (GB)" = ($esx | Measure-Object -Property MemoryTotalGB -Sum).Sum
+    $row."Configured Memory GB" = ($esx | Measure-Object -Property MemoryUsageGB -Sum).Sum
+    $row."Available Memroy (GB)" = ($esx | Measure-Object -InputObject {$_.MemoryTotalGB - $_.MemoryUsageGB} -Sum).Sum
+    $row."Total CPU (Mhz)" = ($esx | Measure-Object -Property CpuTotalMhz -Sum).Sum
+    $row."Configured CPU (Mhz)" = ($esx | Measure-Object -Property CpuUsageMhz -Sum).Sum
+    $row."Available CPU (Mhz)" = ($esx | Measure-Object -InputObject {$_.CpuTotalMhz - $_.CpuUsageMhz} -Sum).Sum
+    $row."Total Disk Space (GB)" = ($ds | where {$_.Type -eq "VMFS"} | Measure-Object -Property CapacityGB -Sum).Sum
+    $row."Configured Disk Space (GB)" = ($ds | Measure-Object -InputObject {$_.CapacityGB - $_.FreeSpaceGB} -Sum).Sum
+    $row."Available Disk Space (GB)" = ($ds | Measure-Object -Property FreeSpaceGB -Sum).Sum
+    $report += $row
+} 
+$report 

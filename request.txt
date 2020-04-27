@@ -1,0 +1,1 @@
+Request-1,'vm_to_be_migrated':'vm-15','source_vcenter_url':'https://192.168.179.140','destination_vcenter_url':'https://192.168.179.141','source_vcenter_cluster':'CMO','destination_vcenter_cluster':'FMO'
