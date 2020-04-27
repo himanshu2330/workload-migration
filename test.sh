@@ -39,12 +39,12 @@ Destination_cluster_avaiable_cpu=`cat report/destination_host_memory_info.json |
 echo "Destination_cluster_avaiable_cpu(Mhz): $Destination_cluster_avaiable_cpu"
 echo""
 echo""
-Memory_requirement_for_VM_migration=`cat report/sourceVMcompute.json | grep memcache-1 | awk -F ' ' '{print $4}'`
+Memory_requirement_for_VM_migration=`cat report/vminfo.json | grep 'Mem' | awk -F " " '{print $3}'`
 echo "Memory_requirement_for_VM_migration(GB): $Memory_requirement_for_VM_migration"
 echo""
 echo""
-#CPU_requirement_for_VM_migration=`cat report/sourceVMcompute.json | grep memcache-1 | awk -F ' ' '{print $3}'`
-#echo " VM cpu assigned (number of cores): $CPU_requirement_for_VM_migration"
+CPU_requirement_for_VM_migration=`cat report/vminfo.json | grep 'CPU(Mhz)' | awk -F " " '{print $3}'`
+echo " VM cpu assigned (Mhz): $CPU_requirement_for_VM_migration"
 #echo""
 #echo""
 echo "Comparing memory for migration:"
@@ -57,23 +57,23 @@ else
 echo "VM memory is not suitable for migration"
 exit 0
 fi
-#if [ ${CPU_requirement_for_VM_migration%%.*} -lt ${Destination_cluster_avaiable_cpu%%.*} ]
-#then
-#echo""
-#echo""
-#echo "VM cpu is suitable for migration"
-#else
-#echo "VM cpu is not suitable for migration"
-#exit 0
-#fi
+if [ ${CPU_requirement_for_VM_migration%%.*} -lt ${Destination_cluster_avaiable_cpu%%.*} ]
+then
+echo""
+echo""
+echo "VM cpu is suitable for migration"
+else
+echo "VM cpu is not suitable for migration"
+exit 0
+fi
 echo ""
 echo "CPU and Memory is good for Migration starting migration"
 
-###################Starting Migration##############################################
-for i in ${V_ticket[@]}
-do
-ansible-playbook migrate.yaml --extra-vars="myvarfile=${i}.yaml"
-done
+####################Starting Migration##############################################
+#for i in ${V_ticket[@]}
+#do
+#ansible-playbook migrate.yaml --extra-vars="myvarfile=${i}.yaml"
+#done
 
 
 
