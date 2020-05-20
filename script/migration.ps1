@@ -1,9 +1,9 @@
-$sourceVCConn = Connect-VIServer -Server 192.168.179.140 -user administrator@vsphere.local -password Vmware@123
-$destVCConn = Connect-VIServer -Server 192.168.179.141 -user administrator@vsphere.local -password Vmware@123
+$sourceVCConn = Connect-VIServer -Server xx.xx.xx.xx -user administrator@vsphere.local -password Vmware@123
+$destVCConn = Connect-VIServer -Server xx.xx.xx.xx -user administrator@vsphere.local -password Vmware@123
 $vm = Get-VM redis-1 -Server $sourceVCConn
 $networkAdapter = Get-NetworkAdapter -VM $vm -Server $sourceVCConn
 $destination = Get-VMHost -Server $destVCConn
-$virtualSwitch = Get-VirtualSwitch -VMHost 192.168.179.137 -Name vSwitch0
+$virtualSwitch = Get-VirtualSwitch -VMHost xx.xx.xx.xx -Name vSwitch0
 #$virtualSwitch = Get-VirtualSwitch -Name vSwitch0
 $destinationPortGroup = Get-VirtualPortGroup -VirtualSwitch $virtualSwitch -Name 'VM Network' -Server $destVCConn
 $destinationDatastore = Get-Datastore -Name 'datastore1' -Server $destVCConn
